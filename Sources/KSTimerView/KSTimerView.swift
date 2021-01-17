@@ -1,7 +1,7 @@
 
 import SwiftUI
 
-enum KMTimerStatus {
+public enum KMTimerStatus {
     case notStarted, playing, paused
 }
     
@@ -172,17 +172,17 @@ public struct KSTimerView: View {
 
 }
 
-struct KSTimerViewMain_Previews: PreviewProvider {
-    static var previews: some View {
+public struct KSTimerViewMain_Previews: PreviewProvider {
+    public static var previews: some View {
         KSTimerView(timerInterval: 30)
     }
 }
 
-struct TimerControlStyle: ViewModifier {
+public struct TimerControlStyle: ViewModifier {
     
     var backgroundColor: Color
     
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .font(.body)
             .frame(width: 60, height: 30)
@@ -192,7 +192,7 @@ struct TimerControlStyle: ViewModifier {
     }
 }
 
-extension View {
+public extension View {
     
     func timerControlStyle(backgroundColor: Color) -> some View {
         self.modifier(TimerControlStyle(backgroundColor: backgroundColor))
@@ -200,9 +200,9 @@ extension View {
     
 }
 
-extension KSTimerView {
+public extension KSTimerView {
     
-    public struct Configuration {
+    struct Configuration {
         var timerBgColor: Color = .blue
         var timerRingBgColor: Color = .blue
         var actionButtonsBgColor: Color = .blue

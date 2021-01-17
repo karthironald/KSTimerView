@@ -1,5 +1,5 @@
 import XCTest
-@testable import KSTimerView
+//@testable import KSTimerView
 
 final class KSTimerViewTests: XCTestCase {
     func testExample() {
