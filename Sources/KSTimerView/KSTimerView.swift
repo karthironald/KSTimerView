@@ -5,7 +5,7 @@ enum KMTimerStatus {
     case notStarted, playing, paused
 }
     
-struct KSTimerView: View {
+public struct KSTimerView: View {
     
     @State var timerInterval: TimeInterval
     @State private var offset: CGFloat = 70
@@ -20,7 +20,7 @@ struct KSTimerView: View {
         CGFloat((timerInterval - completedTime) / timerInterval)
     }
     
-    var body: some View {
+    public var body: some View {
         ZStack {
             Color.clear
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { (_) in
@@ -202,7 +202,7 @@ extension View {
 
 extension KSTimerView {
     
-    struct Configuration {
+    public struct Configuration {
         var timerBgColor: Color = .blue
         var timerRingBgColor: Color = .blue
         var actionButtonsBgColor: Color = .blue
