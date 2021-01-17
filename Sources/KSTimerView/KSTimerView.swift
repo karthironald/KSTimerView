@@ -7,7 +7,7 @@ public enum KMTimerStatus {
     
 public struct KSTimerView: View {
     
-    @State var timerInterval: TimeInterval
+    @Binding var timerInterval: TimeInterval
     @State private var offset: CGFloat = 70
     @State private var completedTime: TimeInterval = 0
     @State private var shouldShowMenus = true // Need to use this for future enhancement
@@ -18,6 +18,11 @@ public struct KSTimerView: View {
     var configuration = KSTimerView.Configuration(timerBgColor: .green, timerRingBgColor: .green, actionButtonsBgColor: .blue, foregroundColor: .white, stepperValue: 5)
     private var progress: CGFloat {
         CGFloat((timerInterval - completedTime) / timerInterval)
+    }
+
+    public init(timerInterval: Binding<TimeInterval>, configuration: KSTimerView.Configuration = KSTimerView.Configuration(timerBgColor: .green, timerRingBgColor: .green, actionButtonsBgColor: .blue, foregroundColor: .white, stepperValue: 5)) {
+        self._timerInterval = timerInterval
+        self.configuration = configuration
     }
     
     public var body: some View {
@@ -174,7 +179,7 @@ public struct KSTimerView: View {
 
 public struct KSTimerViewMain_Previews: PreviewProvider {
     public static var previews: some View {
-        KSTimerView(timerInterval: 30)
+        KSTimerView(timerInterval: .constant(30))
     }
 }
 
@@ -211,7 +216,7 @@ public extension KSTimerView {
         var enableLocalNotification: Bool = true
         var enableHapticFeedback: Bool = true
         
-        internal init(timerBgColor: Color = .blue, timerRingBgColor: Color = .blue, actionButtonsBgColor: Color = .blue, foregroundColor: Color = .white, stepperValue: TimeInterval = 10, enableLocalNotification: Bool = true, enableHapticFeedback: Bool = true) {
+        public init(timerBgColor: Color = .blue, timerRingBgColor: Color = .blue, actionButtonsBgColor: Color = .blue, foregroundColor: Color = .white, stepperValue: TimeInterval = 10, enableLocalNotification: Bool = true, enableHapticFeedback: Bool = true) {
             self.timerBgColor = timerBgColor
             self.timerRingBgColor = timerRingBgColor
             self.actionButtonsBgColor = actionButtonsBgColor
