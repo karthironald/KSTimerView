@@ -1,30 +1,36 @@
 
 import SwiftUI
 
-public enum KMTimerStatus {
-    case notStarted, playing, paused
+public enum KSTimerStatus {
+    case notStarted, running, paused
 }
     
 public struct KSTimerView: View {
     
-    @Binding var timerInterval: TimeInterval
+    // MARK: - Private Properties
     @State private var offset: CGFloat = 70
     @State private var completedTime: TimeInterval = 0
     @State private var shouldShowMenus = true // Need to use this for future enhancement
-    @State private var status: KMTimerStatus = .notStarted
+    @State private var status: KSTimerStatus = .notStarted
     @State private var timer: Timer.TimerPublisher = Timer.publish(every: 1, on: .main, in: .common)
     @State private var backgroundAt = Date()
     
-    var configuration = KSTimerView.Configuration(timerBgColor: .green, timerRingBgColor: .green, actionButtonsBgColor: .blue, foregroundColor: .white, stepperValue: 5)
     private var progress: CGFloat {
         CGFloat((timerInterval - completedTime) / timerInterval)
     }
 
+    // MARK: - Public Properties and Init
+    @Binding var timerInterval: TimeInterval
+    
+    var configuration = KSTimerView.Configuration(timerBgColor: .green, timerRingBgColor: .green, actionButtonsBgColor: .blue, foregroundColor: .white, stepperValue: 5)
+    
+    
     public init(timerInterval: Binding<TimeInterval>, configuration: KSTimerView.Configuration = KSTimerView.Configuration(timerBgColor: .green, timerRingBgColor: .green, actionButtonsBgColor: .blue, foregroundColor: .white, stepperValue: 5)) {
         self._timerInterval = timerInterval
         self.configuration = configuration
     }
     
+    // MARK: - Body
     public var body: some View {
         ZStack {
             Color.clear
@@ -34,7 +40,7 @@ public struct KSTimerView: View {
                 }
             Color.clear
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { (_) in
-                    if self.status == .playing {
+                    if self.status == .running {
                         let backgroundInterval = TimeInterval(Int(Date().timeIntervalSince(self.backgroundAt) + 1))
                         if (self.completedTime + backgroundInterval) >= (self.timerInterval - 1) {
                             self.resetDetails()
@@ -52,11 +58,11 @@ public struct KSTimerView: View {
 
             // Main timer view button
             ZStack {
-                if status == .playing || status == .paused {
+                if status == .running || status == .paused {
                     Circle()
                         .trim(from: 0, to: progress)
                         .stroke(configuration.timerRingBgColor, style: StrokeStyle(lineWidth: 7, lineCap: .round))
-                        .animation((status == .playing || status == .paused) ? Animation.linear(duration: 1) : nil)
+                        .animation((status == .running || status == .paused) ? Animation.linear(duration: 1) : nil)
                         .rotationEffect(.degrees(-90))
                         .frame(width: shouldShowMenus ? 220 : 70, height: shouldShowMenus ? 220 : 70)
                 }
@@ -72,10 +78,10 @@ public struct KSTimerView: View {
                 
                 Button(action: {
                     HapticHelper.shared.hapticFeedback()
-                    if self.status == .playing {
+                    if self.status == .running {
                         self.status = .paused
                     } else if self.status == .paused || self.status == .notStarted {
-                        self.status = .playing
+                        self.status = .running
                     }
                     configureTimerAndNotification()
                 }) {
@@ -117,19 +123,19 @@ public struct KSTimerView: View {
             .animation(.spring())
 
             // Stop button
-            if status == .playing || status == .notStarted {
+            if status == .running || status == .notStarted {
                 Button(action: {
                     HapticHelper.shared.hapticFeedback()
-                    if status == .playing {
+                    if status == .running {
                         self.resetDetails()
                         LocalNotificationHelper.shared.resetTimerNotification()
                     } else {
-                        status = .playing
+                        status = .running
                         configureTimerAndNotification()
                     }
                 }) {
-                    Image(systemName: status == .playing ? "stop" : "play")
-                        .timerControlStyle(backgroundColor: status == .playing ? Color.red : configuration.actionButtonsBgColor)
+                    Image(systemName: status == .running ? "stop" : "play")
+                        .timerControlStyle(backgroundColor: status == .running ? Color.red : configuration.actionButtonsBgColor)
                 }
                 .shadow(radius: shouldShowMenus ? 5 : 0)
                 .offset(y: shouldShowMenus ? (offset + 20) : 0)
@@ -138,7 +144,7 @@ public struct KSTimerView: View {
         }
         .padding(.leading, shouldShowMenus ? 0 : 10)
         .onReceive(timer, perform: { (_) in
-            if self.status == .playing {
+            if self.status == .running {
                 self.completedTime += 1
                 if self.completedTime >= self.timerInterval - 1 {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -150,8 +156,10 @@ public struct KSTimerView: View {
         })
     }
     
-    func configureTimerAndNotification() {
-        if self.status == .playing {
+    // MARK: - Custom Methods
+    /**Configures timer and local notification*/
+    private func configureTimerAndNotification() {
+        if self.status == .running {
             self.startTimer()
             LocalNotificationHelper.shared.addLocalNoification(interval: TimeInterval(self.timerInterval - self.completedTime))
         } else if self.status == .paused {
@@ -160,49 +168,22 @@ public struct KSTimerView: View {
         }
     }
     
-    func resetDetails() {
+    /**Resets local properties to default*/
+    private func resetDetails() {
         self.status = .notStarted
         self.stopTimer()
         self.completedTime = 0
     }
     
-    func stopTimer() {
+    private func stopTimer() {
         self.timer.connect().cancel()
     }
     
-    func startTimer() {
+    private func startTimer() {
         self.timer = Timer.publish(every: 1, on: .main, in: .common)
         _ = timer.connect()
     }
 
-}
-
-public struct KSTimerViewMain_Previews: PreviewProvider {
-    public static var previews: some View {
-        KSTimerView(timerInterval: .constant(30))
-    }
-}
-
-public struct TimerControlStyle: ViewModifier {
-    
-    var backgroundColor: Color
-    
-    public func body(content: Content) -> some View {
-        content
-            .font(.body)
-            .frame(width: 60, height: 30)
-            .background(backgroundColor)
-            .foregroundColor(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 15))
-    }
-}
-
-public extension View {
-    
-    func timerControlStyle(backgroundColor: Color) -> some View {
-        self.modifier(TimerControlStyle(backgroundColor: backgroundColor))
-    }
-    
 }
 
 public extension KSTimerView {
@@ -225,6 +206,29 @@ public extension KSTimerView {
             LocalNotificationHelper.shared.isEnabled = enableLocalNotification
             HapticHelper.shared.isEnabled = enableHapticFeedback
         }
+    }
+    
+}
+
+// MARK: - Custom Modifier
+struct TimerControlStyle: ViewModifier {
+    
+    var backgroundColor: Color
+    
+    func body(content: Content) -> some View {
+        content
+            .font(.body)
+            .frame(width: 60, height: 30)
+            .background(backgroundColor)
+            .foregroundColor(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 15))
+    }
+}
+
+extension View {
+    
+    func timerControlStyle(backgroundColor: Color) -> some View {
+        self.modifier(TimerControlStyle(backgroundColor: backgroundColor))
     }
     
 }
