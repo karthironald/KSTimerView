@@ -2,6 +2,8 @@
 
 A simple `SwiftUI` timer view with **Background**, **LocalNotification** and **Haptic** support.
 
+[![](http://img.youtube.com/vi/o3eHn7bowko/0.jpg)](http://www.youtube.com/watch?v=o3eHn7bowko "")
+
 ## Usage
 
 Initialise the KSTimerView with `TimeInterval` and present it using `.sheet` or `.fullScreenCover` modifier or use with `ZStack`.
