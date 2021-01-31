@@ -152,7 +152,6 @@ public struct KSTimerView: View {
                     }
                 }
             }
-            print("⚠️ \(self.completedTime)")
         })
     }
     
