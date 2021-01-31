@@ -22,7 +22,7 @@ let configuration = KSTimerView.Configuration(timerBgColor: .yellow, timerRingBg
 KSTimerView(timerInterval: $timeInterval, configuration: configuration)
 
 ```
-![Image](https://drive.google.com/file/d/15CyR_DkukNdbUNkrALo0vamPe3RLRzKL/view?usp=sharing)
+![Image](https://github.com/karthironald/KSTimerView/blob/main/Images/TimerView_Config.png)
 
 ## Background 
 Background to foreground will be handled by default. You no need to do anything.
